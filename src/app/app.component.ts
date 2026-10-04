@@ -1,7 +1,9 @@
-import { Component } from '@angular/core'
+import { Component, inject } from '@angular/core'
 import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router'
+import { Store } from '@ngrx/store'
 import { ButtonModule } from 'primeng/button'
 import { TagModule } from 'primeng/tag'
+import { persistWeldState, WeldState } from './store/weld.reducer'
 
 @Component({
   selector:'app-root', standalone:true, imports:[RouterOutlet,RouterLink,RouterLinkActive,ButtonModule,TagModule],
@@ -14,4 +16,10 @@ import { TagModule } from 'primeng/tag'
     @media(max-width:950px){.topbar{height:auto;min-height:64px;padding:10px;flex-wrap:wrap}.brand{min-width:210px}nav{order:3;width:100%;overflow:auto}.topbar p-tag{display:none}}
   `],
 })
-export class AppComponent {}
+export class AppComponent {
+  private readonly store = inject(Store<{ welds: WeldState }>)
+  constructor() {
+    // 现场队列与冲突需跨断网、刷新保留
+    this.store.select('welds').subscribe((state) => persistWeldState(state))
+  }
+}
